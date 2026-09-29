@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PETUALANGAN BANGUN - Matematika Kelas 2 SD</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts - Fredoka & Inter for fun kid typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      font-family: 'Fredoka', 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Bouncy Button Effect */
+    .btn-bounce {
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+    }
+    .btn-bounce:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 9px 0 rgba(0, 0, 0, 0.15);
+    }
+    .btn-bounce:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    /* Floating character animation */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(2deg); }
+    }
+    .animate-float {
+      animation: float 3.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 2s ease-in-out infinite;
+    }
+
+    /* Custom Glassmorphism */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 4px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .drop-zone {
+      border: 3px dashed #6366F1;
+      background-color: rgba(238, 242, 255, 0.6);
+      transition: all 0.2s ease;
+    }
+    .drop-zone.active {
+      background-color: rgba(199, 210, 254, 0.8);
+      border-color: #4338CA;
+      transform: scale(1.02);
+    }
+    .drop-zone.filled {
+      border-style: solid;
+      background-color: rgba(220, 252, 231, 0.8);
+      border-color: #22C55E;
+    }
+
+    /* Confetti Burst */
+    @keyframes particle-out {
+      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) scale(0); opacity: 0; }
+    }
+
+    /* Responsive Canvas */
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="w-full max-w-5xl mx-auto px-4 pt-3 pb-1 flex justify-between items-center z-50">
+    <!-- Home / Back Button -->
+    <button id="btn-home" onclick="goToScreen('screen-home')" class="btn-bounce bg-yellow-400 hover:bg-yellow-300 text-slate-800 font-bold px-4 py-2 rounded-2xl flex items-center gap-2 text-sm md:text-base border-2 border-yellow-500 hidden">
+      <i class="fa-solid fa-house">
+      </i> Menu Utama
+    </button>
+    <div id="brand-header" class="flex items-center gap-2">
+      <span class="bg-indigo-600 text-white font-black text-lg md:text-xl px-3 py-1 rounded-xl shadow border-2 border-indigo-400">
+        📐 PETUALANGAN BANGUN
+      </span>
+    </div>
+
+    <!-- HUD Stats & Settings Controls -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <div class="bg-white/90 border-2 border-amber-300 rounded-2xl px-3 py-1 flex items-center gap-1 shadow-sm">
+        <span class="text-xl">⭐</span>
+        <span id="hud-score" class="font-extrabold text-amber-600 text-base md:text-lg">0</span>
+      </div>
+      <div id="hud-lives-box" class="bg-white/90 border-2 border-red-300 rounded-2xl px-3 py-1 flex items-center gap-1 shadow-sm hidden">
+        <span class="text-lg">❤️</span>
+        <span id="hud-lives" class="font-extrabold text-red-500 text-base md:text-lg">3</span>
+      </div>
+      
+      <!-- Audio Toggles -->
+      <button id="btn-sound" onclick="toggleSound()" class="btn-bounce bg-white border-2 border-indigo-200 text-indigo-600 w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-sm" title="Efek Suara">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+      <button id="btn-music" onclick="toggleMusic()" class="btn-bounce bg-white border-2 border-pink-200 text-pink-600 w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-sm" title="Musik Latar">
+        <i class="fa-solid fa-music"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-6 flex flex-col justify-center items-center">
+
+    <!-- ==================== SCREEN 1: HOME / TITLE SCREEN ==================== -->
+    <section id="screen-home" class="w-full flex flex-col items-center justify-center text-center space-y-6 py-4">
+      <div class="relative max-w-2xl w-full flex flex-col items-center">
+        <!-- Hero Cartoon Visual -->
+        <div class="relative w-48 h-48 md:w-60 md:h-60 mb-2">
+          <!-- Geometric Background Ornaments -->
+          <svg class="absolute inset-0 w-full h-full animate-spin" style="animation-duration: 25s;" viewBox="0 0 200 200">
+            <polygon points="100,10 120,40 80,40" fill="#FBBF24" opacity="0.6"/>
+            <rect x="150" y="80" width="30" height="30" fill="#3B82F6" rx="6" opacity="0.6" transform="rotate(15 165 95)"/>
+            <circle cx="40" cy="140" r="18" fill="#EC4899" opacity="0.6"/>
+            <polygon points="160,150 180,180 140,180" fill="#10B981" opacity="0.6"/>
+          </svg>
+          <!-- Kid Mascot with School Bag -->
+          <svg class="w-full h-full relative z-10 animate-float" viewBox="0 0 200 200">
+            <!-- Cap -->
+            <path d="M70,55 Q100,25 130,55 Z" fill="#EF4444"/>
+            <ellipse cx="100" cy="55" rx="35" ry="8" fill="#DC2626"/>
+            <!-- Head -->
+            <circle cx="100" cy="80" r="32" fill="#FDE047"/>
+            <circle cx="100" cy="82" r="28" fill="#FFEDD5"/>
+            <!-- Eyes -->
+            <circle cx="88" cy="78" r="4" fill="#1E293B"/>
+            <circle cx="112" cy="78" r="4" fill="#1E293B"/>
+            <circle cx="90" cy="76" r="1.5" fill="#FFFFFF"/>
+            <circle cx="114" cy="76" r="1.5" fill="#FFFFFF"/>
+            <!-- Cheeks -->
+            <circle cx="82" cy="86" r="4" fill="#FCA5A5" opacity="0.7"/>
+            <circle cx="118" cy="86" r="4" fill="#FCA5A5" opacity="0.7"/>
+            <!-- Smile -->
+            <path d="M92,90 Q100,100 108,90" fill="none" stroke="#B91C1C" stroke-width="3" stroke-linecap="round"/>
+            <!-- Body / Shirt -->
+            <path d="M72,112 L128,112 L138,160 L62,160 Z" fill="#3B82F6" rx="5"/>
+            <!-- Yellow Star on shirt -->
+            <polygon points="100,122 103,128 110,129 105,134 106,140 100,137 94,140 95,134 90,129 97,128" fill="#FBBF24"/>
+            <!-- Backpack Straps & Bag -->
+            <rect x="52" y="120" width="16" height="36" fill="#10B981" rx="4"/>
+            <rect x="132" y="120" width="16" height="36" fill="#10B981" rx="4"/>
+            <!-- Hands -->
+            <circle cx="60" cy="135" r="7" fill="#FFEDD5"/>
+            <circle cx="140" cy="135" r="7" fill="#FFEDD5"/>
+          </svg>
+        </div>
+
+        <!-- Title & Subtitle -->
+        <div class="text-xs md:text-sm font-black tracking-widest text-indigo-600 bg-white/80 px-3.5 py-1 rounded-full shadow-sm mb-2 border border-indigo-200 inline-block uppercase">
+          703Ledu
+        </div>
+        <h1 class="text-3xl md:text-5xl font-black text-indigo-900 tracking-wide drop-shadow-md leading-tight">
+          PETUALANGAN BANGUN
+        </h1>
+        <p class="text-base md:text-xl font-semibold text-indigo-700 mt-2 bg-white/70 px-4 py-1 rounded-full shadow-sm">
+          ✨ Jelajahi Dunia Bangun Datar dan Bangun Ruang! ✨
+        </p>
+      </div>
+
+      <!-- Action Buttons Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md pt-2">
+        <button onclick="goToScreen('screen-map')" class="btn-bounce bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-lg md:text-xl py-4 px-6 rounded-3xl border-b-4 border-emerald-700 flex items-center justify-center gap-3">
+          <i class="fa-solid fa-play text-2xl"></i> MULAI BERMAIN
+        </button>
+        
+        <button onclick="goToScreen('screen-learn')" class="btn-bounce bg-sky-500 hover:bg-sky-400 text-white font-extrabold text-lg md:text-xl py-4 px-6 rounded-3xl border-b-4 border-sky-700 flex items-center justify-center gap-3">
+          <i class="fa-solid fa-book-open text-2xl"></i> BELAJAR
+        </button>
+
+        <button onclick="goToScreen('screen-achievements')" class="btn-bounce bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-lg md:text-xl py-4 px-6 rounded-3xl border-b-4 border-amber-700 flex items-center justify-center gap-3">
+          <i class="fa-solid fa-trophy text-2xl"></i> PENCAPAIAN
+        </button>
+
+        <button onclick="goToScreen('screen-teacher')" class="btn-bounce bg-purple-500 hover:bg-purple-400 text-white font-extrabold text-lg md:text-xl py-4 px-6 rounded-3xl border-b-4 border-purple-700 flex items-center justify-center gap-3">
+          <i class="fa-solid fa-chalkboard-user text-2xl"></i> MODE GURU
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 2: MODE BELAJAR (FLASHCARDS) ==================== -->
+    <section id="screen-learn" class="w-full flex flex-col items-center space-y-5 hidden">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-indigo-900 flex items-center justify-center gap-2">
+          📚 Ruang Belajar Geometri
+        </h2>
+        <p class="text-slate-600 text-sm md:text-base">Teku kartu untuk melihat penjelasan & mendengar suaranya!</p>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex gap-2 p-1 bg-white/80 rounded-2xl border-2 border-indigo-200">
+        <button id="tab-2d" onclick="filterLearnCards('2d')" class="px-4 py-2 rounded-xl font-bold transition text-sm md:text-base bg-indigo-600 text-white">
+          📐 Bangun Datar
+        </button>
+        <button id="tab-3d" onclick="filterLearnCards('3d')" class="px-4 py-2 rounded-xl font-bold transition text-sm md:text-base text-slate-600 hover:bg-indigo-100">
+          📦 Bangun Ruang
+        </button>
+      </div>
+
+      <!-- Cards Grid Container -->
+      <div id="learn-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-4xl max-h-[62vh] overflow-y-auto p-2">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 3: PETA PETUALANGAN (LEVEL MAP) ==================== -->
+    <section id="screen-map" class="w-full flex flex-col items-center space-y-6 hidden">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-indigo-900">🗺️ Peta Petualangan Bangun</h2>
+        <p class="text-slate-600 text-sm md:text-base">Pilih wilayah petualanganmu dan kumpulkan semua bintang!</p>
+      </div>
+
+      <!-- Map Levels Flow Grid -->
+      <div class="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Level 1 Button Card -->
+        <div id="card-lvl-1" onclick="startLevel(1)" class="btn-bounce glass-card rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer border-4 border-emerald-400 relative overflow-hidden group">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-3xl mb-3">
+            🌳
+          </div>
+          <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-3 py-0.5 rounded-full mb-1">LEVEL 1</span>
+          <h3 class="font-extrabold text-lg text-slate-800">Taman Bangun Datar</h3>
+          <p class="text-xs text-slate-500 mt-1">Segitiga, Segiempat, Segi banyak & Lingkaran</p>
+          <div id="status-lvl-1" class="mt-3 text-sm font-bold flex items-center gap-1 text-emerald-600">
+            🔓 Terbuka
+          </div>
+        </div>
+
+        <!-- Level 2 Button Card -->
+        <div id="card-lvl-2" onclick="startLevel(2)" class="btn-bounce glass-card rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer border-4 border-indigo-300 opacity-90 relative overflow-hidden">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-100 border-2 border-indigo-400 flex items-center justify-center text-3xl mb-3">
+            🏢
+          </div>
+          <span class="text-xs font-bold text-indigo-600 bg-indigo-100 px-3 py-0.5 rounded-full mb-1">LEVEL 2</span>
+          <h3 class="font-extrabold text-lg text-slate-800">Kota Bangun Ruang</h3>
+          <p class="text-xs text-slate-500 mt-1">Kubus, Balok, Kerucut & Bola</p>
+          <div id="status-lvl-2" class="mt-3 text-sm font-bold flex items-center gap-1 text-slate-500">
+            🔒 Terkunci
+          </div>
+        </div>
+
+        <!-- Level 3 Button Card -->
+        <div id="card-lvl-3" onclick="startLevel(3)" class="btn-bounce glass-card rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer border-4 border-amber-300 opacity-90 relative overflow-hidden">
+          <div class="w-16 h-16 rounded-2xl bg-amber-100 border-2 border-amber-400 flex items-center justify-center text-3xl mb-3">
+            🛠️
+          </div>
+          <span class="text-xs font-bold text-amber-600 bg-amber-100 px-3 py-0.5 rounded-full mb-1">LEVEL 3</span>
+          <h3 class="font-extrabold text-lg text-slate-800">Bengkel Bentuk</h3>
+          <p class="text-xs text-slate-500 mt-1">Komposisi: Menyusun Bentuk Baru</p>
+          <div id="status-lvl-3" class="mt-3 text-sm font-bold flex items-center gap-1 text-slate-500">
+            🔒 Terkunci
+          </div>
+        </div>
+
+        <!-- Level 4 Button Card -->
+        <div id="card-lvl-4" onclick="startLevel(4)" class="btn-bounce glass-card rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer border-4 border-purple-300 opacity-90 relative overflow-hidden">
+          <div class="w-16 h-16 rounded-2xl bg-purple-100 border-2 border-purple-400 flex items-center justify-center text-3xl mb-3">
+            🔍
+          </div>
+          <span class="text-xs font-bold text-purple-600 bg-purple-100 px-3 py-0.5 rounded-full mb-1">LEVEL 4</span>
+          <h3 class="font-extrabold text-lg text-slate-800">Detektif Bentuk</h3>
+          <p class="text-xs text-slate-500 mt-1">Dekomposisi: Menguraikan Gambaran</p>
+          <div id="status-lvl-4" class="mt-3 text-sm font-bold flex items-center gap-1 text-slate-500">
+            🔒 Terkunci
+          </div>
+        </div>
+
+        <!-- Level 5 Button Card -->
+        <div id="card-lvl-5" onclick="startLevel(5)" class="btn-bounce glass-card rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer border-4 border-rose-300 opacity-90 relative overflow-hidden">
+          <div class="w-16 h-16 rounded-2xl bg-rose-100 border-2 border-rose-400 flex items-center justify-center text-3xl mb-3">
+            📍
+          </div>
+          <span class="text-xs font-bold text-rose-600 bg-rose-100 px-3 py-0.5 rounded-full mb-1">LEVEL 5</span>
+          <h3 class="font-extrabold text-lg text-slate-800">Petualangan Posisi</h3>
+          <p class="text-xs text-slate-500 mt-1">Atas, Bawah, Kanan, Kiri, Dalam, Luar</p>
+          <div id="status-lvl-5" class="mt-3 text-sm font-bold flex items-center gap-1 text-slate-500">
+            🔒 Terkunci
+          </div>
+        </div>
+
+        <!-- Mini Games Hub Card -->
+        <div onclick="goToScreen('screen-minigames')" class="btn-bounce glass-card rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer border-4 border-pink-400 bg-gradient-to-b from-pink-50 to-white">
+          <div class="w-16 h-16 rounded-2xl bg-pink-100 border-2 border-pink-400 flex items-center justify-center text-3xl mb-3">
+            🎮
+          </div>
+          <span class="text-xs font-bold text-pink-600 bg-pink-100 px-3 py-0.5 rounded-full mb-1">BONUS</span>
+          <h3 class="font-extrabold text-lg text-slate-800">Mini Game Seru</h3>
+          <p class="text-xs text-slate-500 mt-1">Tangkap Bentuk, Puzzle, & Cari Bentuk</p>
+          <div class="mt-3 text-sm font-bold text-pink-600 flex items-center gap-1">
+            ▶ Mainkan Sekarang
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Quiz Button -->
+      <div class="w-full max-w-3xl pt-2">
+        <button onclick="startFinalQuiz()" class="btn-bounce w-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-400 hover:to-red-400 text-white font-black text-lg md:text-xl py-4 px-6 rounded-3xl border-b-4 border-red-700 shadow-lg flex items-center justify-center gap-3">
+          🏆 TANTANGAN AKHIR (KUIS CAMPURAN 15 SOAL)
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: UNIVERSAL LEVEL QUIZ RUNNER ==================== -->
+    <section id="screen-quiz" class="w-full max-w-3xl flex flex-col items-center hidden">
+      <div class="w-full glass-card rounded-3xl p-4 md:p-6 shadow-xl flex flex-col space-y-4 relative">
+        
+        <!-- Question Progress & Controls Header -->
+        <div class="flex justify-between items-center border-b pb-3 border-indigo-100">
+          <div>
+            <span id="quiz-level-badge" class="text-xs font-bold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full">
+              LEVEL 1
+            </span>
+            <span id="quiz-progress-text" class="text-sm font-bold text-slate-600 ml-2">
+              Soal 1 / 5
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="speakCurrentQuestion()" class="btn-bounce bg-sky-100 border border-sky-300 text-sky-700 px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1">
+              🔊 Baca Soal
+            </button>
+            <button onclick="showHintModal()" class="btn-bounce bg-amber-100 border border-amber-300 text-amber-700 px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1">
+              💡 Petunjuk
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Prompt Text -->
+        <h3 id="quiz-question-title" class="text-lg md:text-2xl font-extrabold text-slate-800 text-center py-2">
+          Manakah yang merupakan bangun segitiga?
+        </h3>
+
+        <!-- Question Visual Area (SVG / Image / Diagram) -->
+        <div id="quiz-visual-container" class="w-full h-48 md:h-56 bg-indigo-50/80 rounded-2xl border-2 border-indigo-100 flex items-center justify-center relative overflow-hidden p-3">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Answer Options Container -->
+        <div id="quiz-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Feedback Box -->
+        <div id="quiz-feedback" class="hidden p-4 rounded-2xl text-center font-extrabold text-base md:text-lg animate-pulse">
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 5: LEVEL 3 BENGKEL BENTUK (COMPOSITION) ==================== -->
+    <section id="screen-composition" class="w-full max-w-3xl flex flex-col items-center hidden space-y-4">
+      <div class="text-center">
+        <h2 class="text-2xl font-extrabold text-indigo-900">🛠️ Bengkel Bentuk (Komposisi)</h2>
+        <p id="comp-instructions" class="text-slate-600 text-sm md:text-base font-semibold">
+          Susun bentuk-bentuk di bawah ini ke target garis putus-putus untuk membuat: <span class="text-indigo-600 underline font-black" id="comp-target-name">RUMAH</span>!
+        </p>
+      </div>
+
+      <div class="w-full glass-card rounded-3xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <!-- Target Assembly Area -->
+        <div id="comp-drop-area" class="w-full md:w-2/3 h-64 md:h-80 bg-white/90 rounded-2xl border-4 border-indigo-200 relative overflow-hidden flex items-center justify-center">
+          <!-- Target shape zones rendered dynamically -->
+        </div>
+
+        <!-- Palette of Shape Pieces to Drag/Click -->
+        <div class="w-full md:w-1/3 bg-indigo-50/80 p-3 rounded-2xl border-2 border-indigo-200 flex md:flex-col flex-wrap gap-3 items-center justify-center">
+          <div class="text-xs font-bold text-indigo-700 w-full text-center">PILIH BENTUK:</div>
+          <div id="comp-palette" class="flex md:flex-col flex-wrap gap-2 justify-center items-center">
+            <!-- Shape items dynamically loaded -->
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="resetComposition()" class="btn-bounce bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-sm">
+          🔄 Ulangi
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 6: MINI GAMES HUB ==================== -->
+    <section id="screen-minigames" class="w-full max-w-3xl flex flex-col items-center space-y-6 hidden">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-pink-700">🎮 Mini Game Matematika Seru</h2>
+        <p class="text-slate-600 text-sm md:text-base">Pilih permainan seru untuk melatih ketangkasan geometri!</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <!-- Mini Game 1: Tangkap Bentuk -->
+        <div onclick="startMiniGame('catch')" class="btn-bounce glass-card rounded-3xl p-5 border-4 border-pink-300 cursor-pointer flex items-center gap-4 hover:bg-pink-50">
+          <div class="w-16 h-16 rounded-2xl bg-pink-100 border-2 border-pink-400 flex items-center justify-center text-3xl">
+            🎯
+          </div>
+          <div class="text-left">
+            <h3 class="font-extrabold text-lg text-slate-800">Tangkap Bentuk</h3>
+            <p class="text-xs text-slate-500">Tangkap bentuk yang diminta sebelum jatuh ke bawah!</p>
+          </div>
+        </div>
+
+        <!-- Mini Game 2: Cari Bentuk -->
+        <div onclick="startMiniGame('find')" class="btn-bounce glass-card rounded-3xl p-5 border-4 border-sky-300 cursor-pointer flex items-center gap-4 hover:bg-sky-50">
+          <div class="w-16 h-16 rounded-2xl bg-sky-100 border-2 border-sky-400 flex items-center justify-center text-3xl">
+            🔎
+          </div>
+          <div class="text-left">
+            <h3 class="font-extrabold text-lg text-slate-800">Cari Bentuk Detektif</h3>
+            <p class="text-xs text-slate-500">Temukan bentuk tersembunyi di dalam gambar!</p>
+          </div>
+        </div>
+
+        <!-- Mini Game 3: Kereta Posisi -->
+        <div onclick="startMiniGame('train')" class="btn-bounce glass-card rounded-3xl p-5 border-4 border-amber-300 cursor-pointer flex items-center gap-4 hover:bg-amber-50">
+          <div class="w-16 h-16 rounded-2xl bg-amber-100 border-2 border-amber-400 flex items-center justify-center text-3xl">
+            🚂
+          </div>
+          <div class="text-left">
+            <h3 class="font-extrabold text-lg text-slate-800">Kereta Posisi</h3>
+            <p class="text-xs text-slate-500">Letakkan benda di gerbong kereta sesuai petunjuk!</p>
+          </div>
+        </div>
+
+        <!-- Mini Game 4: Puzzle Bangun -->
+        <div onclick="startMiniGame('puzzle')" class="btn-bounce glass-card rounded-3xl p-5 border-4 border-emerald-300 cursor-pointer flex items-center gap-4 hover:bg-emerald-50">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-3xl">
+            🧩
+          </div>
+          <div class="text-left">
+            <h3 class="font-extrabold text-lg text-slate-800">Puzzle Bangun Datar</h3>
+            <p class="text-xs text-slate-500">Susun potongan menjadi bentuk utuh!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MINI GAME PLAY CONTAINER -->
+    <section id="screen-game-play" class="w-full max-w-2xl flex flex-col items-center hidden">
+      <div id="minigame-container" class="w-full glass-card rounded-3xl p-4 flex flex-col items-center relative">
+        <!-- Rendered dynamically depending on mini game type -->
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 7: PENCAPAIAN / BADGES ==================== -->
+    <section id="screen-achievements" class="w-full max-w-3xl flex flex-col items-center space-y-6 hidden">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-amber-700">🏆 Galeri Lencana Pencapaian</h2>
+        <p class="text-slate-600 text-sm md:text-base">Selesaikan tantangan untuk membuka lencana kebanggaanmu!</p>
+      </div>
+
+      <div id="badges-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 8: MODE GURU (TEACHER DASHBOARD) ==================== -->
+    <section id="screen-teacher" class="w-full max-w-3xl flex flex-col items-center space-y-6 hidden">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-purple-900">👩‍🏫 Mode Guru & Orang Tua</h2>
+        <p class="text-slate-600 text-sm md:text-base">Laporan perkembangan belajar murid secara real-time.</p>
+      </div>
+
+      <div class="w-full glass-card rounded-3xl p-6 space-y-6">
+        <!-- Student Info Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-4 border-slate-200 gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-purple-100 border-2 border-purple-400 flex items-center justify-center text-2xl">
+              🎓
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-400">NAMA SISWA:</span>
+              <h3 id="teacher-student-name" class="text-lg font-black text-slate-800">Petualang Cilik</h3>
+            </div>
+          </div>
+          <button onclick="editStudentName()" class="btn-bounce bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-xl text-xs">
+            ✏️ Ubah Nama
+          </button>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-2xl text-center">
+            <span class="text-xs font-bold text-indigo-500">TOTAL SKOR</span>
+            <div id="teacher-score" class="text-2xl font-black text-indigo-700">0 ⭐</div>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center">
+            <span class="text-xs font-bold text-emerald-500">JAWABAN BENAR</span>
+            <div id="teacher-correct" class="text-2xl font-black text-emerald-700">0</div>
+          </div>
+          <div class="bg-rose-50 border border-rose-200 p-3 rounded-2xl text-center">
+            <span class="text-xs font-bold text-rose-500">JAWABAN SALAH</span>
+            <div id="teacher-wrong" class="text-2xl font-black text-rose-700">0</div>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-center">
+            <span class="text-xs font-bold text-amber-500">AKURASI</span>
+            <div id="teacher-accuracy" class="text-2xl font-black text-amber-700">0%</div>
+          </div>
+        </div>
+
+        <!-- Level Completion Checklist -->
+        <div>
+          <h4 class="font-extrabold text-slate-700 mb-2 text-sm">Status Level Selesai:</h4>
+          <div id="teacher-levels-list" class="space-y-2">
+            <!-- Dynamic checklist -->
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="pt-2 border-t border-slate-200 flex justify-end">
+          <button onclick="resetGameData()" class="btn-bounce bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+            ⚠️ RESET DATA PROGRES
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 9: KUIS AKHIR HASIL REPORT CARD ==================== -->
+    <section id="screen-report" class="w-full max-w-2xl flex flex-col items-center space-y-6 hidden">
+      <div class="w-full glass-card rounded-3xl p-6 text-center space-y-5 border-4 border-amber-400 relative overflow-hidden">
+        <div class="text-5xl">🏆</div>
+        <h2 class="text-3xl font-black text-amber-800">HASIL BELAJAR PETUALANGAN</h2>
+        
+        <!-- Student Name Prompt/Display -->
+        <div class="bg-amber-50 border-2 border-amber-200 p-3 rounded-2xl max-w-sm mx-auto">
+          <span class="text-xs font-bold text-amber-600">NAMA PEJUANG MATEMATIKA:</span>
+          <input type="text" id="report-input-name" placeholder="Tulis Namamu Di Sini..." class="w-full text-center font-extrabold text-lg bg-transparent border-b-2 border-amber-400 focus:outline-none text-slate-800" onchange="saveStudentName(this.value)">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+          <div class="bg-white p-3 rounded-2xl border border-amber-200">
+            <span class="text-xs font-bold text-slate-400">SKOR TANTANGAN</span>
+            <div id="report-score" class="text-3xl font-black text-amber-600">0 / 150</div>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-amber-200">
+            <span class="text-xs font-bold text-slate-400">BINTANG DILAPORKAN</span>
+            <div id="report-stars" class="text-2xl">⭐⭐⭐⭐⭐</div>
+          </div>
+        </div>
+
+        <!-- Evaluation Feedback Box -->
+        <div id="report-feedback-badge" class="p-4 rounded-2xl bg-emerald-100 text-emerald-800 font-extrabold text-xl">
+          🌟 Sangat Hebat!
+        </div>
+
+        <button onclick="goToScreen('screen-home')" class="btn-bounce bg-emerald-500 text-white font-extrabold text-lg py-3 px-8 rounded-2xl border-b-4 border-emerald-700">
+          Kembali ke Menu Utama
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL DIALOGS -->
+  <!-- Hint Modal -->
+  <div id="modal-hint" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-md w-full rounded-3xl p-6 text-center space-y-4 border-4 border-amber-300">
+      <div class="text-4xl">💡</div>
+      <h3 class="text-xl font-black text-amber-800">Petunjuk Bantuan</h3>
+      <p id="hint-text-content" class="text-slate-700 font-medium text-base">
+        Perhatikan jumlah sisi dan sudut dari bangun tersebut!
+      </p>
+      <button onclick="closeHintModal()" class="btn-bounce bg-amber-500 text-white font-bold py-2 px-6 rounded-2xl">
+        Saya Mengerti!
+      </button>
+    </div>
+  </div>
+
+  <!-- Reward Level Complete Popup -->
+  <div id="modal-reward" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-md w-full rounded-3xl p-6 text-center space-y-4 border-4 border-emerald-400 animate-bounce">
+      <div class="text-6xl">🎉</div>
+      <h3 id="reward-title" class="text-2xl font-black text-emerald-800">HEBAT! LEVEL SELESAI!</h3>
+      <p id="reward-desc" class="text-slate-700 font-bold text-base">Kamu berhasil menyelesaikan tantangan ini dan mendapatkan +50 Skor!</p>
+      <div class="text-3xl" id="reward-badge-icon">🎖️</div>
+      <button onclick="closeRewardModal()" class="btn-bounce bg-emerald-500 text-white font-extrabold text-lg py-3 px-8 rounded-2xl border-b-4 border-emerald-700">
+        Lanjutkan Petualangan ▶
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // --- APP STATE ---
+    let gameState = {
+      score: 0,
+      lives: 3,
+      studentName: 'Petualang Cilik',
+      levelsCompleted: [false, false, false, false, false],
+      badges: {
+        jagoBangunDatar: false,
+        ahliBangunRuang: false,
+        masterPuzzle: false,
+        detektifPosisi: false,
+        pahlawanMatematika: false
+      },
+      stats: {
+        correct: 0,
+        wrong: 0,
+        startTime: Date.now()
+      },
+      soundOn: true,
+      musicOn: false
+    };
+
+    // Current quiz state
+    let currentLevel = 1;
+    let currentQuestionIdx = 0;
+    let currentQuizQuestions = [];
+    let comboCount = 0;
+
+    // Load persisted state from LocalStorage
+    function loadSavedState() {
+      const saved = localStorage.getItem('petualangan_bangun_save');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          gameState = { ...gameState, ...parsed };
+        } catch (e) {
+          console.error('Error loading save state', e);
+        }
+      }
+      updateHUD();
+    }
+
+    function saveGameState() {
+      localStorage.setItem('petualangan_bangun_save', JSON.stringify(gameState));
+      updateHUD();
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-score').innerText = gameState.score;
+      document.getElementById('hud-lives').innerText = gameState.lives;
+      document.getElementById('teacher-student-name').innerText = gameState.studentName;
+      document.getElementById('teacher-score').innerText = gameState.score + ' ⭐';
+      document.getElementById('teacher-correct').innerText = gameState.stats.correct;
+      document.getElementById('teacher-wrong').innerText = gameState.stats.wrong;
+      
+      const total = gameState.stats.correct + gameState.stats.wrong;
+      const acc = total > 0 ? Math.round((gameState.stats.correct / total) * 100) : 0;
+      document.getElementById('teacher-accuracy').innerText = acc + '%';
+
+      updateLevelMapUI();
+    }
+
+    // --- WEB AUDIO SYNTHESIZER ---
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!gameState.soundOn) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+
+        if (type === 'click') {
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.2);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'star' || type === 'fanfare') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          osc.frequency.setValueAtTime(1046.50, now + 0.24);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        }
+      } catch (e) {
+        console.log('Audio Context Error', e);
+      }
+    }
+
+    // Toggle Audio Controls
+    function toggleSound() {
+      gameState.soundOn = !gameState.soundOn;
+      const btn = document.getElementById('btn-sound');
+      btn.innerHTML = gameState.soundOn ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-slate-400"></i>';
+      saveGameState();
+    }
+
+    let bgMusicTimer = null;
+    function toggleMusic() {
+      gameState.musicOn = !gameState.musicOn;
+      const btn = document.getElementById('btn-music');
+      btn.innerHTML = gameState.musicOn ? '<i class="fa-solid fa-music"></i>' : '<i class="fa-solid fa-slash font-bold text-slate-400">🎵</i>';
+      
+      if (gameState.musicOn) {
+        startBgMusicLoop();
+      } else {
+        clearInterval(bgMusicTimer);
+      }
+      saveGameState();
+    }
+
+    function startBgMusicLoop() {
+      if (bgMusicTimer) clearInterval(bgMusicTimer);
+      const notes = [261.63, 329.63, 392.00, 329.63, 349.23, 440.00, 392.00, 293.66];
+      let step = 0;
+      bgMusicTimer = setInterval(() => {
+        if (!gameState.musicOn) return;
+        try {
+          const ctx = getAudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(notes[step % notes.length], ctx.currentTime);
+          gain.gain.setValueAtTime(0.04, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+          
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.4);
+          step++;
+        } catch (e) {}
+      }, 500);
+    }
+
+    // Indonesian Text-To-Speech Reader
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // --- SCREEN NAVIGATION ENGINE ---
+    function goToScreen(screenId) {
+      playSound('click');
+      const screens = [
+        'screen-home', 'screen-learn', 'screen-map', 'screen-quiz', 
+        'screen-composition', 'screen-minigames', 'screen-game-play', 
+        'screen-achievements', 'screen-teacher', 'screen-report'
+      ];
+      screens.forEach(s => {
+        document.getElementById(s).classList.add('hidden');
+      });
+
+      document.getElementById(screenId).classList.remove('hidden');
+
+      // Show/Hide Home Button
+      const btnHome = document.getElementById('btn-home');
+      if (screenId === 'screen-home') {
+        btnHome.classList.add('hidden');
+      } else {
+        btnHome.classList.remove('hidden');
+      }
+
+      // Hide lives box unless in quiz
+      const livesBox = document.getElementById('hud-lives-box');
+      if (screenId === 'screen-quiz') {
+        livesBox.classList.remove('hidden');
+      } else {
+        livesBox.classList.add('hidden');
+      }
+
+      if (screenId === 'screen-learn') renderLearnCards();
+      if (screenId === 'screen-achievements') renderAchievements();
+      if (screenId === 'screen-teacher') renderTeacherDashboard();
+    }
+
+    // --- MODE BELAJAR DATA & RENDERER ---
+    const learnData = [
+      { id: '1', cat: '2d', title: 'Segitiga', desc: 'Memiliki 3 sisi lurus dan 3 sudut.', example: 'Contoh: Potongan pizza, rambu lalu lintas', color: '#3B82F6', svg: '<polygon points="50,15 90,85 10,85" fill="#3B82F6"/>' },
+      { id: '2', cat: '2d', title: 'Segiempat', desc: 'Memiliki 4 sisi dan 4 sudut.', example: 'Contoh: Papan tulis, jendela, buku', color: '#10B981', svg: '<rect x="15" y="15" width="70" height="70" fill="#10B981" rx="4"/>' },
+      { id: '3', cat: '2d', title: 'Segi Banyak', desc: 'Bangun datar yang memiliki lebih dari 4 sisi.', example: 'Contoh: Sarang lebah (Segienam)', color: '#F59E0B', svg: '<polygon points="50,10 85,35 85,75 50,95 15,75 15,35" fill="#F59E0B"/>' },
+      { id: '4', cat: '2d', title: 'Lingkaran', desc: 'Berbentuk bulat dan tidak memiliki sisi lurus.', example: 'Contoh: Roda sepeda, koin, jam dinding', color: '#EC4899', svg: '<circle cx="50" cy="50" r="38" fill="#EC4899"/>' },
+      
+      { id: '5', cat: '3d', title: 'Kubus', desc: 'Memiliki 6 sisi berbentuk persegi yang sama besar.', example: 'Contohnya adalah dadu mainan, kotak kado', color: '#8B5CF6', svg: '<rect x="25" y="25" width="50" height="50" fill="#8B5CF6"/><polygon points="25,25 40,10 90,10 75,25" fill="#A78BFA"/><polygon points="75,25 90,10 90,60 75,75" fill="#7C3AED"/>' },
+      { id: '6', cat: '3d', title: 'Balok', desc: 'Memiliki 6 sisi, bentuknya memanjang.', example: 'Contohnya adalah kotak sepatu, tempat pensil', color: '#06B6D4', svg: '<rect x="15" y="30" width="60" height="40" fill="#06B6D4"/><polygon points="15,30 30,15 90,15 75,30" fill="#22D3EE"/><polygon points="75,30 90,15 90,55 75,70" fill="#0891B2"/>' },
+      { id: '7', cat: '3d', title: 'Kerucut', desc: 'Memiliki alas lingkaran dan ujung runcing di atas.', example: 'Contohnya adalah topi ulang tahun, es krim', color: '#F43F5E', svg: '<polygon points="50,15 85,75 15,75" fill="#F43F5E"/><ellipse cx="50" cy="75" rx="35" ry="10" fill="#E11D48"/>' },
+      { id: '8', cat: '3d', title: 'Bola', desc: 'Berbentuk bulat utuh sempurna tanpa sudut.', example: 'Contohnya adalah bola sepak, bola basket', color: '#10B981', svg: '<circle cx="50" cy="50" r="38" fill="#10B981"/><path d="M30,30 Q50,60 70,30" fill="none" stroke="#FFFFFF" stroke-width="3"/>' }
+    ];
+
+    let currentLearnFilter = '2d';
+
+    function filterLearnCards(cat) {
+      currentLearnFilter = cat;
+      document.getElementById('tab-2d').className = cat === '2d' ? 'px-4 py-2 rounded-xl font-bold transition text-sm md:text-base bg-indigo-600 text-white' : 'px-4 py-2 rounded-xl font-bold transition text-sm md:text-base text-slate-600 hover:bg-indigo-100';
+      document.getElementById('tab-3d').className = cat === '3d' ? 'px-4 py-2 rounded-xl font-bold transition text-sm md:text-base bg-indigo-600 text-white' : 'px-4 py-2 rounded-xl font-bold transition text-sm md:text-base text-slate-600 hover:bg-indigo-100';
+      renderLearnCards();
+    }
+
+    function renderLearnCards() {
+      const grid = document.getElementById('learn-cards-grid');
+      grid.innerHTML = '';
+
+      learnData.filter(item => item.cat === currentLearnFilter).forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'btn-bounce glass-card p-4 rounded-3xl flex flex-col items-center text-center cursor-pointer border-2 border-indigo-100 hover:border-indigo-300';
+        card.onclick = () => {
+          playSound('star');
+          speakText(`${item.title}. ${item.desc} ${item.example}`);
+        };
+        card.innerHTML = `
+          <div class="w-24 h-24 mb-3 flex items-center justify-center">
+            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
+              ${item.svg}
+            </svg>
+          </div>
+          <h3 class="font-extrabold text-lg text-slate-800">${item.title}</h3>
+          <p class="text-xs text-slate-600 mt-1 font-semibold">${item.desc}</p>
+          <span class="mt-3 text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+            ${item.example}
+          </span>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // --- LEVEL MAP MANAGEMENT ---
+    function updateLevelMapUI() {
+      for (let i = 1; i <= 5; i++) {
+        const card = document.getElementById(`card-lvl-${i}`);
+        const status = document.getElementById(`status-lvl-${i}`);
+        const isCompleted = gameState.levelsCompleted[i - 1];
+        const isUnlocked = i === 1 || gameState.levelsCompleted[i - 2];
+
+        if (isCompleted) {
+          status.innerHTML = '⭐ Selesai!';
+          status.className = 'mt-3 text-sm font-bold flex items-center gap-1 text-amber-600';
+          card.classList.remove('opacity-90');
+        } else if (isUnlocked) {
+          status.innerHTML = '🔓 Terbuka';
+          status.className = 'mt-3 text-sm font-bold flex items-center gap-1 text-emerald-600';
+          card.classList.remove('opacity-90');
+        } else {
+          status.innerHTML = '🔒 Terkunci';
+          status.className = 'mt-3 text-sm font-bold flex items-center gap-1 text-slate-400';
+          card.classList.add('opacity-90');
+        }
+      }
+    }
+
+    // --- QUIZ QUESTIONS DATABASE ---
+    const quizDatabase = {
+      level1: [
+        {
+          title: "Manakah yang merupakan bentuk SEGITIGA?",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><polygon points="50,10 90,85 10,85" fill="#3B82F6"/></svg>',
+          options: ["Segitiga", "Segiempat", "Lingkaran", "Segi Banyak"],
+          correct: 0,
+          hint: "Segitiga memiliki 3 sisi lurus!"
+        },
+        {
+          title: "Berapa jumlah sisi lurus pada bangun SEGIEMPAT?",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><rect x="15" y="15" width="70" height="70" fill="#10B981" rx="4"/></svg>',
+          options: ["3 Sisi", "4 Sisi", "5 Sisi", "Tidak ada sisi"],
+          correct: 1,
+          hint: "Hitung semua garis tepi luarnya: atas, bawah, kiri, dan kanan."
+        },
+        {
+          title: "Bangun datar yang bulat dan TIDAK memiliki sisi lurus adalah...",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><circle cx="50" cy="50" r="40" fill="#EC4899"/></svg>',
+          options: ["Segitiga", "Kubus", "Lingkaran", "Segiempat"],
+          correct: 2,
+          hint: "Bentuk ini seperti roda sepeda atau koin logam."
+        },
+        {
+          title: "Manakah yang termasuk SEGI BANYAK (memiliki lebih dari 4 sisi)?",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><polygon points="50,10 85,35 85,75 50,95 15,75 15,35" fill="#F59E0B"/></svg>',
+          options: ["Lingkaran", "Segitiga", "Segi Enam (Sarang Lebah)", "Segiempat"],
+          correct: 2,
+          hint: "Bangun ini seperti rumah sarang lebah madu."
+        },
+        {
+          title: "Pilih gambar yang sesuai dengan nama SEGITIGA!",
+          visual: '<div class="text-xl font-bold text-indigo-700">Manakah gambar Segitiga?</div>',
+          options: [
+            '<svg viewBox="0 0 50 50" class="w-12 h-12 inline"><polygon points="25,5 45,45 5,45" fill="#3B82F6"/></svg> (Segitiga)',
+            '<svg viewBox="0 0 50 50" class="w-12 h-12 inline"><circle cx="25" cy="25" r="20" fill="#EC4899"/></svg> (Lingkaran)',
+            '<svg viewBox="0 0 50 50" class="w-12 h-12 inline"><rect x="5" y="5" width="40" height="40" fill="#10B981"/></svg> (Segiempat)',
+            '<svg viewBox="0 0 50 50" class="w-12 h-12 inline"><polygon points="25,5 45,20 38,45 12,45 5,20" fill="#F59E0B"/></svg> (Segilima)'
+          ],
+          correct: 0,
+          hint: "Cari bentuk yang punya 3 sudut runcing!"
+        }
+      ],
+
+      level2: [
+        {
+          title: "Benda DADU MAINAN menyerupai bangun ruang apa?",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><rect x="20" y="20" width="60" height="60" fill="#8B5CF6" rx="8"/><circle cx="35" cy="35" r="4" fill="#FFF"/><circle cx="65" cy="65" r="4" fill="#FFF"/><circle cx="50" cy="50" r="4" fill="#FFF"/></svg>',
+          options: ["Kubus", "Bola", "Kerucut", "Tabung"],
+          correct: 0,
+          hint: "Kubus memiliki 6 sisi berbentuk persegi sama besar."
+        },
+        {
+          title: "KOTAK SEPATU menyerupai bangun ruang apa?",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><rect x="10" y="30" width="80" height="40" fill="#06B6D4" rx="4"/><polygon points="10,30 25,15 95,15 80,30" fill="#22D3EE"/></svg>',
+          options: ["Bola", "Balok", "Kerucut", "Segitiga"],
+          correct: 1,
+          hint: "Balok bentuknya memanjang seperti kotak susu/sepatu."
+        },
+        {
+          title: "TOPI ULANG TAHUN berbentuk bangun ruang...",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><polygon points="50,10 85,80 15,80" fill="#F43F5E"/><ellipse cx="50" cy="80" rx="35" ry="10" fill="#E11D48"/></svg>',
+          options: ["Kubus", "Balok", "Kerucut", "Bola"],
+          correct: 2,
+          hint: "Kerucut memiliki alas bulat dan puncak runcing."
+        },
+        {
+          title: "BOLA SEPAK berbentuk bangun ruang...",
+          visual: '<svg viewBox="0 0 100 100" class="w-32 h-32"><circle cx="50" cy="50" r="38" fill="#10B981"/><polygon points="50,30 60,40 55,52 45,52 40,40" fill="#1E293B"/></svg>',
+          options: ["Bola", "Kubus", "Balok", "Kerucut"],
+          correct: 0,
+          hint: "Bola berbentuk bulat utuh dan bisa menggelinding."
+        }
+      ],
+
+      level4: [
+        {
+          title: "Gambar RUMAH ini tersusun dari bangun apa saja? (Dekomposisi)",
+          visual: `
+            <svg viewBox="0 0 150 150" class="w-40 h-40">
+              <!-- Roof: Triangle -->
+              <polygon points="75,20 130,70 20,70" fill="#EF4444" stroke="#B91C1C" stroke-width="3"/>
+              <!-- Wall: Square -->
+              <rect x="30" y="70" width="90" height="70" fill="#FBBF24" stroke="#D97706" stroke-width="3"/>
+              <!-- Door: Rectangle -->
+              <rect x="62" y="100" width="26" height="40" fill="#3B82F6" stroke="#1D4ED8" stroke-width="2"/>
+              <!-- Window: Circle -->
+              <circle cx="75" cy="45" r="10" fill="#38BDF8" stroke="#0284C7" stroke-width="2"/>
+            </svg>
+          `,
+          options: ["Segitiga, Persegi & Lingkaran", "Hanya Lingkaran", "Hanya Kubus", "Hanya Kerucut"],
+          correct: 0,
+          hint: "Perhatikan atapnya (segitiga), dindingnya (persegi), dan jendelanya (lingkaran)."
+        },
+        {
+          title: "Gambar MOBIL mainan ini tersusun dari bangun apa saja?",
+          visual: `
+            <svg viewBox="0 0 150 150" class="w-40 h-40">
+              <rect x="20" y="60" width="110" height="40" fill="#3B82F6" rx="6"/>
+              <rect x="45" y="35" width="60" height="25" fill="#60A5FA" rx="4"/>
+              <circle cx="45" cy="100" r="16" fill="#1E293B"/>
+              <circle cx="105" cy="100" r="16" fill="#1E293B"/>
+            </svg>
+          `,
+          options: ["Persegi Panjang & Lingkaran (Roda)", "Segitiga saja", "Kerucut saja", "Bola saja"],
+          correct: 0,
+          hint: "Badan mobil berupa segiempat dan rodanya berupa lingkaran."
+        }
+      ],
+
+      level5: [
+        {
+          title: "Kucing (🐱) berada di mana terhadap MEJA?",
+          visual: `
+            <svg viewBox="0 0 200 150" class="w-48 h-36">
+              <!-- Table -->
+              <rect x="40" y="70" width="120" height="12" fill="#854D0E" rx="2"/>
+              <rect x="50" y="82" width="10" height="40" fill="#713F12"/>
+              <rect x="140" y="82" width="10" height="40" fill="#713F12"/>
+              <!-- Cat on top -->
+              <text x="88" y="60" font-size="32">🐱</text>
+            </svg>
+          `,
+          options: ["Di Atas Meja", "Di Bawah Meja", "Di Dalam Meja", "Di Belakang Meja"],
+          correct: 0,
+          hint: "Lihat posisi kucing berada di bagian permukaan atas meja."
+        },
+        {
+          title: "Bola Sepak (⚽) berada di mana terhadap MEJA?",
+          visual: `
+            <svg viewBox="0 0 200 150" class="w-48 h-36">
+              <!-- Table -->
+              <rect x="40" y="50" width="120" height="12" fill="#854D0E" rx="2"/>
+              <rect x="50" y="62" width="10" height="50" fill="#713F12"/>
+              <rect x="140" y="62" width="10" height="50" fill="#713F12"/>
+              <!-- Ball under -->
+              <text x="88" y="100" font-size="28">⚽</text>
+            </svg>
+          `,
+          options: ["Di Atas Meja", "Di Bawah Meja", "Di Dalam Meja", "Di Samping Kiri"],
+          correct: 1,
+          hint: "Bola berada di area lantai di bawah meja."
+        },
+        {
+          title: "Ikan (🐟) berada di mana terhadap AQUARIUM?",
+          visual: `
+            <svg viewBox="0 0 200 150" class="w-48 h-36">
+              <!-- Aquarium -->
+              <rect x="50" y="40" width="100" height="80" fill="#E0F2FE" stroke="#0284C7" stroke-width="4" rx="8"/>
+              <!-- Fish inside -->
+              <text x="85" y="85" font-size="32">🐟</text>
+            </svg>
+          `,
+          options: ["Di Luar", "Di Dalam Aquarium", "Di Atas", "Di Bawah"],
+          correct: 1,
+          hint: "Ikan berenang masuk ke dalam air aquarium."
+        }
+      ]
+    };
+
+    // --- QUIZ RUNNER LOGIC ---
+    function startLevel(lvl) {
+      if (lvl > 1 && !gameState.levelsCompleted[lvl - 2]) {
+        playSound('wrong');
+        speakText('Level ini masih terkunci! Selesaikan level sebelumnya terlebih dahulu.');
+        return;
+      }
+
+      currentLevel = lvl;
+
+      if (lvl === 3) {
+        // Level 3 is Bengkel Bentuk Composition drag and drop
+        goToScreen('screen-composition');
+        initCompositionLevel();
+        return;
+      }
+
+      // Quiz Levels (1, 2, 4, 5)
+      currentQuestionIdx = 0;
+      if (lvl === 1) currentQuizQuestions = quizDatabase.level1;
+      if (lvl === 2) currentQuizQuestions = quizDatabase.level2;
+      if (lvl === 4) currentQuizQuestions = quizDatabase.level4;
+      if (lvl === 5) currentQuizQuestions = quizDatabase.level5;
+
+      goToScreen('screen-quiz');
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      const q = currentQuizQuestions[currentQuestionIdx];
+      document.getElementById('quiz-level-badge').innerText = `LEVEL ${currentLevel}`;
+      document.getElementById('quiz-progress-text').innerText = `Soal ${currentQuestionIdx + 1} / ${currentQuizQuestions.length}`;
+      document.getElementById('quiz-question-title').innerText = q.title;
+      document.getElementById('quiz-visual-container').innerHTML = q.visual;
+
+      const optsContainer = document.getElementById('quiz-options-container');
+      optsContainer.innerHTML = '';
+
+      q.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-bounce bg-white border-2 border-indigo-200 hover:border-indigo-500 font-bold p-4 rounded-2xl text-left text-slate-800 text-sm md:text-base shadow-sm flex items-center justify-between';
+        btn.innerHTML = `<span>${optText}</span> <i class="fa-solid fa-circle-chevron-right text-indigo-400"></i>`;
+        btn.onclick = () => checkQuizAnswer(idx);
+        optsContainer.appendChild(btn);
+      });
+
+      document.getElementById('quiz-feedback').classList.add('hidden');
+    }
+
+    function checkQuizAnswer(selectedIdx) {
+      const q = currentQuizQuestions[currentQuestionIdx];
+      const feedback = document.getElementById('quiz-feedback');
+      feedback.classList.remove('hidden');
+
+      if (selectedIdx === q.correct) {
+        playSound('correct');
+        comboCount++;
+        gameState.score += 10;
+        gameState.stats.correct++;
+        
+        let extraMsg = '';
+        if (comboCount >= 3) {
+          extraMsg = ' 🔥 COMBO 3x BONUS!';
+          gameState.score += 5;
+        }
+
+        feedback.className = 'p-4 rounded-2xl text-center font-extrabold text-base md:text-lg bg-emerald-100 text-emerald-800 border-2 border-emerald-400 animate-pulse';
+        feedback.innerText = `🎉 Hebat! Jawabanmu Benar! (+10 ⭐)${extraMsg}`;
+
+        setTimeout(() => {
+          currentQuestionIdx++;
+          if (currentQuestionIdx < currentQuizQuestions.length) {
+            renderQuizQuestion();
+          } else {
+            // Level Completed!
+            finishLevelSuccess(currentLevel);
+          }
+        }, 1500);
+
+      } else {
+        playSound('wrong');
+        comboCount = 0;
+        gameState.stats.wrong++;
+
+        feedback.className = 'p-4 rounded-2xl text-center font-extrabold text-base md:text-lg bg-rose-100 text-rose-800 border-2 border-rose-400';
+        feedback.innerText = `Coba lagi! ${q.hint}`;
+      }
+
+      saveGameState();
+    }
+
+    function speakCurrentQuestion() {
+      const q = currentQuizQuestions[currentQuestionIdx];
+      if (q) speakText(q.title);
+    }
+
+    function showHintModal() {
+      const q = currentQuizQuestions[currentQuestionIdx];
+      if (q) {
+        document.getElementById('hint-text-content').innerText = q.hint;
+        document.getElementById('modal-hint').classList.remove('hidden');
+      }
+    }
+
+    function closeHintModal() {
+      document.getElementById('modal-hint').classList.add('hidden');
+    }
+
+    // --- LEVEL 3 BENGKEL BENTUK LOGIC ---
+    const compTargets = [
+      {
+        name: "RUMAH",
+        piecesNeeded: [
+          { type: 'triangle', label: 'Atap Segitiga', placed: false },
+          { type: 'square', label: 'Dinding Persegi', placed: false },
+          { type: 'rectangle', label: 'Pintu Panjang', placed: false },
+          { type: 'circle', label: 'Jendela Bulat', placed: false }
+        ]
+      }
+    ];
+
+    let currentCompState = [];
+
+    function initCompositionLevel() {
+      currentCompState = JSON.parse(JSON.stringify(compTargets[0].piecesNeeded));
+      renderCompositionUI();
+    }
+
+    function renderCompositionUI() {
+      document.getElementById('comp-target-name').innerText = compTargets[0].name;
+
+      // Drop Zone Canvas SVG
+      const dropArea = document.getElementById('comp-drop-area');
+      dropArea.innerHTML = `
+        <svg viewBox="0 0 200 200" class="w-full h-full max-w-xs">
+          <!-- House Roof Zone -->
+          <polygon points="100,20 170,80 30,80" fill="${currentCompState[0].placed ? '#EF4444' : '#E2E8F0'}" stroke="#94A3B8" stroke-width="2" stroke-dasharray="${currentCompState[0].placed ? '0' : '4'}"/>
+          <text x="100" y="55" font-size="10" text-anchor="middle" fill="#64748B">${currentCompState[0].placed ? '✨ ATAP' : 'Atap'}</text>
+
+          <!-- House Wall Zone -->
+          <rect x="40" y="80" width="120" height="90" fill="${currentCompState[1].placed ? '#FBBF24' : '#E2E8F0'}" stroke="#94A3B8" stroke-width="2" stroke-dasharray="${currentCompState[1].placed ? '0' : '4'}"/>
+          
+          <!-- House Door Zone -->
+          <rect x="85" y="115" width="30" height="55" fill="${currentCompState[2].placed ? '#3B82F6' : '#CBD5E1'}" stroke="#64748B" stroke-width="2" stroke-dasharray="${currentCompState[2].placed ? '0' : '3'}"/>
+
+          <!-- House Window Zone -->
+          <circle cx="100" cy="100" r="12" fill="${currentCompState[3].placed ? '#38BDF8' : '#CBD5E1'}" stroke="#64748B" stroke-width="2" stroke-dasharray="${currentCompState[3].placed ? '0' : '3'}"/>
+        </svg>
+      `;
+
+      // Palette Shapes
+      const palette = document.getElementById('comp-palette');
+      palette.innerHTML = '';
+
+      currentCompState.forEach((piece, idx) => {
+        if (!piece.placed) {
+          const item = document.createElement('button');
+          item.className = 'btn-bounce bg-white border-2 border-indigo-300 p-2 rounded-xl flex items-center gap-2 font-bold text-xs text-indigo-800 shadow-sm';
+          item.onclick = () => placeCompPiece(idx);
+          item.innerHTML = `<span>➕ ${piece.label}</span>`;
+          palette.appendChild(item);
+        }
+      });
+
+      // Check Completion
+      if (currentCompState.every(p => p.placed)) {
+        setTimeout(() => {
+          playSound('fanfare');
+          finishLevelSuccess(3);
+        }, 500);
+      }
+    }
+
+    function placeCompPiece(idx) {
+      playSound('click');
+      currentCompState[idx].placed = true;
+      renderCompositionUI();
+    }
+
+    function resetComposition() {
+      initCompositionLevel();
+    }
+
+    // --- LEVEL SUCCESS ENGINE ---
+    function finishLevelSuccess(lvl) {
+      gameState.levelsCompleted[lvl - 1] = true;
+      gameState.score += 50;
+
+      // Unlock Badges
+      if (lvl === 1) gameState.badges.jagoBangunDatar = true;
+      if (lvl === 2) gameState.badges.ahliBangunRuang = true;
+      if (lvl === 3) gameState.badges.masterPuzzle = true;
+      if (lvl === 5) gameState.badges.detektifPosisi = true;
+
+      saveGameState();
+      playSound('fanfare');
+
+      document.getElementById('reward-title').innerText = `🎉 HEBAT! LEVEL ${lvl} SELESAI!`;
+      document.getElementById('reward-desc').innerText = `Kamu berhasil menyelesaikan petualangan di wilayah ini dan mendapatkan +50 Bintang Bonus!`;
+      document.getElementById('modal-reward').classList.remove('hidden');
+    }
+
+    function closeRewardModal() {
+      document.getElementById('modal-reward').classList.add('hidden');
+      goToScreen('screen-map');
+    }
+
+    // --- MINI GAME 1: TANGKAP BENTUK CANVAS ---
+    let catchGameInterval = null;
+    let catchScore = 0;
+    let fallingObjects = [];
+
+    function startMiniGame(type) {
+      goToScreen('screen-game-play');
+      const container = document.getElementById('minigame-container');
+
+      if (type === 'catch') {
+        catchScore = 0;
+        fallingObjects = [];
+        container.innerHTML = `
+          <h3 class="font-black text-xl text-pink-700 mb-1">🎯 Tangkap Bentuk LINGKARAN!</h3>
+          <p class="text-xs text-slate-500 mb-2">Geser/Sentuh layar untuk menangkap LINGKARAN yang jatuh!</p>
+          <div class="relative w-full max-w-md h-72 bg-indigo-900 rounded-2xl overflow-hidden shadow-inner" id="catch-canvas-box">
+            <canvas id="catchCanvas" class="w-full h-full"></canvas>
+          </div>
+          <div class="mt-3 flex justify-between w-full max-w-md font-extrabold text-sm text-slate-700">
+            <span>TANGKAPAN: <span id="catch-count" class="text-pink-600">0</span> / 10</span>
+            <button onclick="goToScreen('screen-minigames')" class="text-xs bg-slate-200 px-3 py-1 rounded-lg">Batal</button>
+          </div>
+        `;
+
+        setTimeout(initCatchGameCanvas, 100);
+      } else if (type === 'find') {
+        container.innerHTML = `
+          <h3 class="font-black text-xl text-sky-700 mb-1">🔎 Cari 3 SEGITIGA Tersembunyi!</h3>
+          <p class="text-xs text-slate-500 mb-3">Tekan segitiga yang tersembunyi pada pemandangan di bawah ini!</p>
+          <div class="relative w-full max-w-md h-64 bg-sky-100 rounded-2xl border-4 border-sky-300 overflow-hidden flex items-center justify-center">
+            <!-- Mountain scene with hidden triangles -->
+            <svg viewBox="0 0 200 150" class="w-full h-full">
+              <!-- Mountain 1 (Triangle 1) -->
+              <polygon points="10,120 70,30 130,120" fill="#10B981" class="cursor-pointer hover:opacity-80" onclick="findHiddenShape(1)"/>
+              <!-- Tree Roof (Triangle 2) -->
+              <polygon points="145,110 165,70 185,110" fill="#059669" class="cursor-pointer hover:opacity-80" onclick="findHiddenShape(2)"/>
+              <!-- Sun (Circle - distraction) -->
+              <circle cx="30" cy="30" r="15" fill="#FBBF24"/>
+              <!-- Roof of cabin (Triangle 3) -->
+              <polygon points="90,110 115,85 140,110" fill="#EF4444" class="cursor-pointer hover:opacity-80" onclick="findHiddenShape(3)"/>
+            </svg>
+          </div>
+          <div id="find-status" class="mt-3 font-extrabold text-sky-700 text-sm">Ditemukan: 0 / 3</div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="text-center py-6">
+            <div class="text-4xl mb-2">⭐</div>
+            <h3 class="text-xl font-bold">Mini Game Siap Dimainkan!</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-4">Selesaikan tantangan untuk +20 Bintang Bonus!</p>
+            <button onclick="finishMiniGameBonus()" class="btn-bounce bg-pink-500 text-white font-extrabold px-6 py-2 rounded-2xl">
+              Klaim +20 Bintang ⭐
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    let foundShapesCount = 0;
+    function findHiddenShape(num) {
+      playSound('star');
+      foundShapesCount++;
+      document.getElementById('find-status').innerText = `Ditemukan: ${foundShapesCount} / 3 ✨`;
+      if (foundShapesCount >= 3) {
+        setTimeout(finishMiniGameBonus, 500);
+      }
+    }
+
+    function finishMiniGameBonus() {
+      playSound('fanfare');
+      gameState.score += 20;
+      saveGameState();
+      goToScreen('screen-minigames');
+    }
+
+    function initCatchGameCanvas() {
+      const canvas = document.getElementById('catchCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+
+      let basketX = canvas.width / 2;
+      const basketWidth = 60;
+
+      // Touch / Mouse controls
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        basketX = e.clientX - rect.left;
+      });
+      canvas.addEventListener('touchmove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches[0]) basketX = e.touches[0].clientX - rect.left;
+      });
+
+      clearInterval(catchGameInterval);
+      catchGameInterval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Spawn shapes
+        if (Math.random() < 0.05) {
+          fallingObjects.push({
+            x: Math.random() * (canvas.width - 30) + 15,
+            y: 0,
+            type: Math.random() > 0.4 ? 'circle' : 'square',
+            speed: 2 + Math.random() * 2
+          });
+        }
+
+        // Draw Basket
+        ctx.fillStyle = '#FBBF24';
+        ctx.fillRect(basketX - basketWidth / 2, canvas.height - 20, basketWidth, 15);
+
+        // Update & Draw falling shapes
+        for (let i = fallingObjects.length - 1; i >= 0; i--) {
+          const obj = fallingObjects[i];
+          obj.y += obj.speed;
+
+          if (obj.type === 'circle') {
+            ctx.fillStyle = '#EC4899';
+            ctx.beginPath();
+            ctx.arc(obj.x, obj.y, 12, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = '#10B981';
+            ctx.fillRect(obj.x - 10, obj.y - 10, 20, 20);
+          }
+
+          // Catch collision
+          if (obj.y >= canvas.height - 30 && Math.abs(obj.x - basketX) < basketWidth / 2 + 10) {
+            if (obj.type === 'circle') {
+              playSound('correct');
+              catchScore++;
+              document.getElementById('catch-count').innerText = catchScore;
+            } else {
+              playSound('wrong');
+            }
+            fallingObjects.splice(i, 1);
+
+            if (catchScore >= 10) {
+              clearInterval(catchGameInterval);
+              finishMiniGameBonus();
+            }
+          } else if (obj.y > canvas.height) {
+            fallingObjects.splice(i, 1);
+          }
+        }
+      }, 1000 / 30);
+    }
+
+    // --- FINAL QUIZ ENGINE (TANTANGAN AKHIR) ---
+    function startFinalQuiz() {
+      // Create 15 mixed questions from database
+      const mix = [
+        ...quizDatabase.level1,
+        ...quizDatabase.level2,
+        ...quizDatabase.level4,
+        ...quizDatabase.level5
+      ];
+      // Duplicate to ensure 15 questions
+      currentQuizQuestions = [...mix, ...mix].slice(0, 15);
+      currentQuestionIdx = 0;
+      currentLevel = 'AKHIR';
+
+      goToScreen('screen-quiz');
+      renderQuizQuestion();
+    }
+
+    function finishFinalQuizReport() {
+      goToScreen('screen-report');
+      const score = gameState.score;
+      document.getElementById('report-score').innerText = `${score} / 150`;
+
+      const feedbackBox = document.getElementById('report-feedback-badge');
+      if (score >= 135) {
+        feedbackBox.innerText = "🌟 Sangat Hebat! Master Geometri!";
+        feedbackBox.className = "p-4 rounded-2xl bg-emerald-100 text-emerald-800 font-extrabold text-xl";
+      } else if (score >= 110) {
+        feedbackBox.innerText = "🎉 Hebat! Pintar Sekali!";
+        feedbackBox.className = "p-4 rounded-2xl bg-sky-100 text-sky-800 font-extrabold text-xl";
+      } else if (score >= 80) {
+        feedbackBox.innerText = "👍 Bagus! Teruskan Belajarmu!";
+        feedbackBox.className = "p-4 rounded-2xl bg-amber-100 text-amber-800 font-extrabold text-xl";
+      } else {
+        feedbackBox.innerText = "💪 Ayo Berlatih Lagi! Kamu pasti bisa!";
+        feedbackBox.className = "p-4 rounded-2xl bg-purple-100 text-purple-800 font-extrabold text-xl";
+      }
+      gameState.badges.pahlawanMatematika = true;
+      saveGameState();
+    }
+
+    function saveStudentName(name) {
+      if (name.trim()) {
+        gameState.studentName = name.trim();
+        saveGameState();
+      }
+    }
+
+    function editStudentName() {
+      const name = prompt('Masukkan Nama Siswa:', gameState.studentName);
+      if (name) saveStudentName(name);
+    }
+
+    // --- ACHIEVEMENTS & TEACHER DASHBOARD ---
+    function renderAchievements() {
+      const grid = document.getElementById('badges-grid');
+      grid.innerHTML = '';
+
+      const list = [
+        { key: 'jagoBangunDatar', title: '🏅 Jago Bangun Datar', desc: 'Selesaikan Level 1 Taman Bangun Datar' },
+        { key: 'ahliBangunRuang', title: '🏅 Ahli Bangun Ruang', desc: 'Selesaikan Level 2 Kota Bangun Ruang' },
+        { key: 'masterPuzzle', title: '🏅 Master Puzzle', desc: 'Selesaikan Level 3 Bengkel Bentuk' },
+        { key: 'detektifPosisi', title: '🏅 Detektif Posisi', desc: 'Selesaikan Level 5 Petualangan Posisi' },
+        { key: 'pahlawanMatematika', title: '🏆 Pahlawan Matematika', desc: 'Selesaikan Tantangan Akhir' }
+      ];
+
+      list.forEach(item => {
+        const unlocked = gameState.badges[item.key];
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-3xl border-2 flex items-center gap-3 ${unlocked ? 'bg-amber-50 border-amber-300 text-slate-800' : 'bg-slate-100 border-slate-200 opacity-60 text-slate-400'}`;
+        card.innerHTML = `
+          <div class="text-3xl">${unlocked ? '🌟' : '🔒'}</div>
+          <div>
+            <h4 class="font-extrabold text-base">${item.title}</h4>
+            <p class="text-xs text-slate-500">${item.desc}</p>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderTeacherDashboard() {
+      const list = document.getElementById('teacher-levels-list');
+      list.innerHTML = '';
+
+      const levelNames = [
+        "Level 1: Taman Bangun Datar",
+        "Level 2: Kota Bangun Ruang",
+        "Level 3: Bengkel Bentuk",
+        "Level 4: Detektif Bentuk",
+        "Level 5: Petualangan Posisi"
+      ];
+
+      levelNames.forEach((name, idx) => {
+        const done = gameState.levelsCompleted[idx];
+        const item = document.createElement('div');
+        item.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-200 text-sm font-bold';
+        item.innerHTML = `
+          <span>${name}</span>
+          <span class="${done ? 'text-emerald-600' : 'text-slate-400'}">${done ? '✅ Selesai' : '⏳ Belum Selesai'}</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function resetGameData() {
+      if (confirm('Apakah Anda yakin ingin meriset semua data progres bermain?')) {
+        localStorage.removeItem('petualangan_bangun_save');
+        gameState = {
+          score: 0,
+          lives: 3,
+          studentName: 'Petualang Cilik',
+          levelsCompleted: [false, false, false, false, false],
+          badges: {
+            jagoBangunDatar: false,
+            ahliBangunRuang: false,
+            masterPuzzle: false,
+            detektifPosisi: false,
+            pahlawanMatematika: false
+          },
+          stats: { correct: 0, wrong: 0, startTime: Date.now() },
+          soundOn: true,
+          musicOn: false
+        };
+        saveGameState();
+        goToScreen('screen-home');
+      }
+    }
+
+    // Window Onload Initialization
+    window.onload = function() {
+      loadSavedState();
+      console.log("Petualangan Bangun initialized successfully!");
+    };
+  </script>
+</body>
+</html>
